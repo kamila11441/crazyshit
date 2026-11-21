@@ -36,15 +36,25 @@ document.addEventListener("click", e => {
 });
 
 /* ---------- project window ---------- */
+const video = (v, title) => {
+  const o = typeof v === "string" ? {src: v} : v, src = o.src || "";
+  const yt = src.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/), vm = src.match(/vimeo\.com\/(\d+)/);
+  const frame = u => `<div class="vid"><iframe src="${u}" title="${esc(title)} video" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`;
+  if (yt) return frame(`https://www.youtube-nocookie.com/embed/${yt[1]}`);
+  if (vm) return frame(`https://player.vimeo.com/video/${vm[1]}`);
+  const silent = o.loop && !reduce; /* looping clips autoplay muted, unless calm mode is on */
+  return `<div class="vid"><video src="${esc(src)}" ${o.poster ? `poster="${esc(o.poster)}"` : ""} playsinline preload="metadata" ${silent ? "autoplay muted loop" : "controls"}></video></div>`;
+};
 function openProject(i) {
   const p = P[i]; modalOpen = true;
   $("#min").innerHTML = `<p class="eyebrow">${esc(p.kind)} for ${esc(p.client || "")}, ${esc(p.year)}</p><h2>${esc(p.title)}</h2>
     <p class="eyebrow">${(p.tags || []).map(esc).join(", ")}</p><p class="t">${esc(p.text)}</p>
     ${p.url ? `<a class="btn glass" style="display:inline-block;text-decoration:none" href="${esc(p.url)}" target="_blank" rel="noopener">View live ↗</a>` : ""}
+    <div class="vids">${(p.videos || []).map(v => video(v, p.title)).join("")}</div>
     <div class="shots">${(p.images || []).map((s, k) => `<div>${s ? `<img src="${esc(s)}" alt="${esc(p.title)} ${k + 1}" loading="lazy">` : pad(k + 1)}</div>`).join("")}</div>`;
   $("#modal").hidden = false; $("#mx").focus();
 }
-const closeModal = () => { modalOpen = false; $("#modal").hidden = true; };
+const closeModal = () => { modalOpen = false; $("#modal").hidden = true; $("#min").innerHTML = ""; };
 $("#mx").onclick = closeModal;
 $("#copen").onclick = () => { const i = Math.round(cur) - 1; if (P[i]) openProject(i); };
 
@@ -89,7 +99,7 @@ function init3D() {
       vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;float d=-mv.z;
       gl_PointSize=aSize*uPx*(60./max(d,1.));
       vA=smoothstep(0.,6.,d)*(1.-smoothstep(90.,170.,d))*(.55+.45*sin(uTime*(1.+aSeed*3.)+aSeed*60.));
-      vC=mix(vec3(1.,.68,.3),vec3(1.,.94,.82),aSeed*aSeed);}`,
+      vC=mix(vec3(1.,.78,.42),vec3(1.,.92,.72),aSeed*aSeed);}`,
     fragmentShader: `varying float vA;varying vec3 vC;void main(){float r=length(gl_PointCoord-.5);gl_FragColor=vec4(vC,smoothstep(.5,0.,r)*vA*.55);}`
   }));
   dust.frustumCulled = false; scene.add(dust);
@@ -102,9 +112,9 @@ function init3D() {
   /* project panels */
   const loader = new THREE.TextureLoader();
   const placeholder = (p, i) => {
-    const c = document.createElement("canvas"); c.width = 1024; c.height = 640; const g = c.getContext("2d"), h = (45 + i * 22) % 360;
-    const gr = g.createLinearGradient(0, 0, 1024, 640); gr.addColorStop(0, `oklch(.22 .05 ${h})`); gr.addColorStop(1, `oklch(.62 .13 ${(h + 30) % 360})`);
-    g.fillStyle = gr; g.fillRect(0, 0, 1024, 640); g.fillStyle = "rgba(255,255,255,.14)"; g.font = "700 380px 'Playfair Display', Georgia, serif"; g.fillText(pad(i + 1), 48, 600);
+    const c = document.createElement("canvas"); c.width = 1024; c.height = 640; const g = c.getContext("2d"), h = 50 + (i % 4) * 12;
+    const gr = g.createLinearGradient(0, 0, 1024, 640); gr.addColorStop(0, `oklch(.2 .03 ${h})`); gr.addColorStop(1, `oklch(.47 .09 ${h + 20})`);
+    g.fillStyle = gr; g.fillRect(0, 0, 1024, 640); g.fillStyle = "rgba(244,233,210,.16)"; g.font = "700 380px 'Playfair Display', Georgia, serif"; g.fillText(pad(i + 1), 48, 600);
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
   };
   const panels = P.map((p, i) => {
@@ -112,7 +122,7 @@ function init3D() {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(15, 9.4), mat);
     m.position.set((i % 2 ? 1 : -1) * 4.5, ((i % 3) - 1) * 1.2, camZ(i + 1) - 19);
     m.userData = {i, stop: i + 1};
-    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry), new THREE.LineBasicMaterial({color: 0xE0B565, transparent: true, opacity: 0})));
+    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry), new THREE.LineBasicMaterial({color: 0xF2D9A1, transparent: true, opacity: 0})));
     scene.add(m);
     if (p.cover) loader.load(p.cover, t => { t.colorSpace = THREE.SRGBColorSpace; mat.map = t; mat.needsUpdate = true; });
     return m;
@@ -177,7 +187,7 @@ function init3D() {
     uni.uTime.value = reduce ? 0 : now / 1000;
     for (const m of panels) {
       const v = clamp(1.5 - Math.abs(cur - m.userData.stop), 0, 1), s = v * v * (3 - 2 * v);
-      m.material.opacity = s; m.children[0].material.opacity = s * .8; m.visible = s > .01;
+      m.material.opacity = s; m.children[0].material.opacity = s * .55; m.visible = s > .01;
       if (!reduce) m.rotation.y = Math.sin(now / 1000 * .4 + m.userData.i) * .05;
     }
     const bs = clamp(1 - cur * 1.3, 0, 1); ball.visible = bs > .01; ball.scale.setScalar(bs || .001); ball.position.y = 1.5 + (reduce ? 0 : Math.sin(now / 1800) * .25);
