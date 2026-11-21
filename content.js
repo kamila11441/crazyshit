@@ -18,6 +18,7 @@ window.SITE = {
       "I work best with small teams who want to ship early, test with real users and keep the interface simple as it grows."
     ],
     skills: ["Website design", "Web app and dashboard UX", "Design systems", "Prototyping", "Front-end handoff"],
+    recognition: ["Award or feature, 2026", "Award or feature, 2025"]
   },
 
   contact: {
