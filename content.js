@@ -1,44 +1,42 @@
 /* =====================================================================
-   EDIT ONLY THIS FILE. The whole site is built from it.
-   Photos go in /images. Use paths like "images/p1.jpg".
+   EDIT ONLY THIS FILE for content. Photos go in /images ("images/p1.jpg").
    Leave a cover as "" and a generated colour panel is shown instead.
+   kind: "Website" or "Web app". Placeholder text below: replace it with yours.
    ===================================================================== */
 window.SITE = {
   name: "Your Name",
-  role: "Your role, City",
-  tagline: "One line about what you make and how it feels.",
-  description: "One sentence about your work, used for search results and link previews.",
+  role: "Website and web app designer, City",
+  tagline: "I design websites that make people stay and web apps that people don’t have to think about.",
+  description: "Portfolio of website and web app design: product interfaces, marketing sites and design systems.",
 
   about: {
     title: "About",
     text: [
-      "Write two or three short paragraphs about how you work and what you care about.",
-      "A second paragraph can cover your background and who you like to work with."
+      "I design the whole path from first visit to daily use: the marketing site that explains a product and the app people open every morning.",
+      "I work best with small teams who want to ship early, test with real users and keep the interface simple as it grows."
     ],
-    skills: ["Skill one", "Skill two", "Skill three", "Skill four"],
+    skills: ["Website design", "Web app and dashboard UX", "Design systems", "Prototyping", "Front-end handoff"],
     recognition: ["Award or feature, 2026", "Award or feature, 2025"]
   },
 
   contact: {
-    lead: "Have a project in mind? I’d love to hear about it.",
+    lead: "Have a site or app in mind? I’d love to hear about it.",
     email: "hello@example.com",
     socials: [
-      { label: "Instagram", url: "https://www.instagram.com/" },
-      { label: "LinkedIn",  url: "https://www.linkedin.com/" }
+      { label: "Dribbble", url: "https://dribbble.com/" },
+      { label: "LinkedIn", url: "https://www.linkedin.com/" },
+      { label: "Read.cv",  url: "https://read.cv/" }
     ]
   },
 
-  /* One entry per project. They fly past in this order.
-     cover: image shown on the floating panel (any size, about 3:2 works best).
-     images: extra images in the project window. url: optional live link. */
   projects: [
-    { id: "one",   title: "Project One",   client: "Client", year: 2026, tags: ["Tag", "Tag"], cover: "", images: ["", ""], url: "",
+    { id: "one",   kind: "Website", title: "Project One",   client: "Client", year: 2026, tags: ["Brand site", "Webflow"],        cover: "", images: ["", ""], url: "",
+      text: "A short description of the brief, your role and the result, such as a 40% rise in demo requests." },
+    { id: "two",   kind: "Web app", title: "Project Two",   client: "Client", year: 2026, tags: ["Dashboard", "Design system"],   cover: "", images: ["", ""], url: "",
+      text: "A short description of the brief, your role and the result, such as onboarding cut from nine steps to four." },
+    { id: "three", kind: "Website", title: "Project Three", client: "Client", year: 2025, tags: ["E-commerce"],                   cover: "", images: ["", ""], url: "",
       text: "A short description of the brief, your role and the result." },
-    { id: "two",   title: "Project Two",   client: "Client", year: 2026, tags: ["Tag"],        cover: "", images: ["", ""], url: "",
-      text: "A short description of the brief, your role and the result." },
-    { id: "three", title: "Project Three", client: "Client", year: 2025, tags: ["Tag", "Tag"], cover: "", images: ["", ""], url: "",
-      text: "A short description of the brief, your role and the result." },
-    { id: "four",  title: "Project Four",  client: "Client", year: 2025, tags: ["Tag"],        cover: "", images: ["", ""], url: "",
+    { id: "four",  kind: "Web app", title: "Project Four",  client: "Client", year: 2025, tags: ["SaaS", "Mobile web"],           cover: "", images: ["", ""], url: "",
       text: "A short description of the brief, your role and the result." }
   ]
 };
