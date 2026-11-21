@@ -1,10 +1,11 @@
-# Immersive scroll portfolio template
+[README.md](https://github.com/user-attachments/files/35193299/README.md)
+# Website and web app design portfolio
 
 A single-page portfolio where you fly through a tunnel of light past your projects. Built with Three.js (loaded from a CDN, no build step), for GitHub Pages.
 
 ## Use it
 1. Edit **content.js**. It is the only file you need to change.
-2. Put images in **images/** and set each project's `cover` (shown on the floating panel) and `images` (shown in the project window). Empty covers get a generated colour panel.
+2. Put images in **images/** and set each project's `kind` ("Website" or "Web app"), `cover` (shown on the floating panel) and `images` (shown in the project window). Empty covers get a generated colour panel.
 3. Upload everything to a GitHub repo, then Settings → Pages → deploy from the `main` branch (root).
 
 ## Test locally
