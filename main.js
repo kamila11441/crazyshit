@@ -26,7 +26,7 @@ $("#contact").innerHTML = `<p class="eyebrow">${esc(C.lead)}</p><a class="big" h
 $("#sr").innerHTML = P.map((p, i) => `<li><a href="#" data-p="${i}">${esc(p.title)}</a>, ${esc(p.year)}</li>`).join("");
 
 const links = [["Home", 0], ...(P.length ? [["Work", 1]] : []), ["About", ABOUT], ["Contact", CONTACT]];
-$("#nav").innerHTML = links.map(([l, s]) => `<a href="#" data-s="${s}">${l}</a>`).join("");
+$("#nav").innerHTML = links.map(([l, s]) => `<a href="#" data-s="${s}" data-text="${l}">${l}</a>`).join("");
 const labels = ["Home", ...P.map(p => p.title), "About", "Contact"];
 $("#dots").innerHTML = labels.map((l, i) => `<li><button data-s="${i}" aria-label="${esc(l)}"></button></li>`).join("");
 document.addEventListener("click", e => {
@@ -37,8 +37,8 @@ document.addEventListener("click", e => {
 /* ---------- project window ---------- */
 function openProject(i) {
   const p = P[i]; modalOpen = true;
-  $("#min").innerHTML = `<p class="eyebrow">P.${pad(i + 1)} / ${esc(p.client || "")} / ${esc(p.year)}</p><h2>${esc(p.title)}</h2>
-    <p class="eyebrow">${(p.tags || []).map(esc).join(" · ")}</p><p class="t">${esc(p.text)}</p>
+  $("#min").innerHTML = `<p class="eyebrow">${esc(p.kind)} for ${esc(p.client || "")}, ${esc(p.year)}</p><h2>${esc(p.title)}</h2>
+    <p class="eyebrow">${(p.tags || []).map(esc).join(", ")}</p><p class="t">${esc(p.text)}</p>
     ${p.url ? `<a class="btn glass" style="display:inline-block;text-decoration:none" href="${esc(p.url)}" target="_blank" rel="noopener">View live ↗</a>` : ""}
     <div class="shots">${(p.images || []).map((s, k) => `<div>${s ? `<img src="${esc(s)}" alt="${esc(p.title)} ${k + 1}" loading="lazy">` : pad(k + 1)}</div>`).join("")}</div>`;
   $("#modal").hidden = false; $("#mx").focus();
@@ -64,9 +64,9 @@ if (renderer) init3D();
 
 function init3D() {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.setClearColor(0x050B1A, 1);
+  renderer.setClearColor(0x0a1226, 1);
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x050B1A, 0.006);
+  scene.fog = new THREE.FogExp2(0x0a1226, 0.006);
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 500);
   const END = camZ(N - 1) - 80;
 
@@ -102,9 +102,9 @@ function init3D() {
   /* project panels */
   const loader = new THREE.TextureLoader();
   const placeholder = (p, i) => {
-    const c = document.createElement("canvas"); c.width = 1024; c.height = 640; const g = c.getContext("2d"), h = (215 + i * 28) % 360;
-    const gr = g.createLinearGradient(0, 0, 1024, 640); gr.addColorStop(0, `hsl(${h} 75% 16%)`); gr.addColorStop(1, `hsl(${(h + 40) % 360} 85% 46%)`);
-    g.fillStyle = gr; g.fillRect(0, 0, 1024, 640); g.fillStyle = "rgba(255,255,255,.14)"; g.font = "700 380px Antonio, 'Arial Narrow', sans-serif"; g.fillText(pad(i + 1), 48, 600);
+    const c = document.createElement("canvas"); c.width = 1024; c.height = 640; const g = c.getContext("2d"), h = (250 + i * 28) % 360;
+    const gr = g.createLinearGradient(0, 0, 1024, 640); gr.addColorStop(0, `oklch(.24 .08 ${h})`); gr.addColorStop(1, `oklch(.55 .19 ${(h + 40) % 360})`);
+    g.fillStyle = gr; g.fillRect(0, 0, 1024, 640); g.fillStyle = "rgba(255,255,255,.14)"; g.font = "700 380px 'Familjen Grotesk', Arial, sans-serif"; g.fillText(pad(i + 1), 48, 600);
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
   };
   const panels = P.map((p, i) => {
@@ -147,7 +147,7 @@ function init3D() {
   const sections = [[$("#hero"), 0], [$("#about"), ABOUT], [$("#contact"), CONTACT]];
   const cap = $("#cap"); let capI = -1;
   const setCap = i => { capI = i; const p = P[i]; if (!p) return;
-    $("#cmeta").textContent = `P.${pad(i + 1)} / ${p.client || ""} / ${p.year}`; $("#ctitle").textContent = p.title; $("#ctags").textContent = (p.tags || []).join(" · "); };
+    $("#cmeta").textContent = `${p.kind} for ${p.client || ""}, ${p.year}`; $("#ctitle").textContent = p.title; $("#ctags").textContent = (p.tags || []).join(", "); };
   const show = (el, o, shift) => { el.style.opacity = o; el.style.visibility = o > .02 ? "visible" : "hidden"; el.dataset.sh = shift; };
   const navEls = [...document.querySelectorAll("#nav a")], dotEls = [...document.querySelectorAll("#dots button")];
   function overlay() {
