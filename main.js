@@ -5,7 +5,8 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const pad = n => String(n).padStart(2, "0");
-const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const calm = $("#calm"); calm.setAttribute("aria-pressed", reduce); calm.onclick = () => { reduce = !reduce; calm.setAttribute("aria-pressed", reduce); };
 
 /* ---------- stops: home, each project, about, contact ---------- */
 const ABOUT = P.length + 1, CONTACT = P.length + 2, N = P.length + 3, SP = 38;
@@ -64,9 +65,9 @@ if (renderer) init3D();
 
 function init3D() {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.setClearColor(0x0a1226, 1);
+  renderer.setClearColor(0x0E0805, 1);
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x0a1226, 0.006);
+  scene.fog = new THREE.FogExp2(0x0E0805, 0.006);
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 500);
   const END = camZ(N - 1) - 80;
 
@@ -88,7 +89,7 @@ function init3D() {
       vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;float d=-mv.z;
       gl_PointSize=aSize*uPx*(60./max(d,1.));
       vA=smoothstep(0.,6.,d)*(1.-smoothstep(90.,170.,d))*(.55+.45*sin(uTime*(1.+aSeed*3.)+aSeed*60.));
-      vC=mix(vec3(.24,.55,1.),vec3(.85,.92,1.),aSeed*aSeed);}`,
+      vC=mix(vec3(1.,.68,.3),vec3(1.,.94,.82),aSeed*aSeed);}`,
     fragmentShader: `varying float vA;varying vec3 vC;void main(){float r=length(gl_PointCoord-.5);gl_FragColor=vec4(vC,smoothstep(.5,0.,r)*vA*.9);}`
   }));
   dust.frustumCulled = false; scene.add(dust);
@@ -97,14 +98,19 @@ function init3D() {
   const lp = [];
   for (let x = -30; x <= 30; x += 10) for (let y = -20; y <= 20; y += 10) lp.push(x, y, 40, x, y, END);
   const lg = new THREE.BufferGeometry(); lg.setAttribute("position", new THREE.Float32BufferAttribute(lp, 3));
-  scene.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({color: 0x3D8BFF, transparent: true, opacity: .14, blending: THREE.AdditiveBlending, depthWrite: false})));
+  scene.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({color: 0xC9974A, transparent: true, opacity: .14, blending: THREE.AdditiveBlending, depthWrite: false})));
+
+  /* disco ball render from leborrel.nl, blended additively so its dark backdrop vanishes */
+  const bt = new THREE.TextureLoader().load("images/discoball.webp", t => { t.colorSpace = THREE.SRGBColorSpace; });
+  const ball = new THREE.Mesh(new THREE.PlaneGeometry(7, 7), new THREE.MeshBasicMaterial({map: bt, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false}));
+  ball.position.set(innerWidth < 760 ? 0 : 4.6, 1.5, -6); scene.add(ball);
 
   /* project panels */
   const loader = new THREE.TextureLoader();
   const placeholder = (p, i) => {
-    const c = document.createElement("canvas"); c.width = 1024; c.height = 640; const g = c.getContext("2d"), h = (250 + i * 28) % 360;
-    const gr = g.createLinearGradient(0, 0, 1024, 640); gr.addColorStop(0, `oklch(.24 .08 ${h})`); gr.addColorStop(1, `oklch(.55 .19 ${(h + 40) % 360})`);
-    g.fillStyle = gr; g.fillRect(0, 0, 1024, 640); g.fillStyle = "rgba(255,255,255,.14)"; g.font = "700 380px 'Familjen Grotesk', Arial, sans-serif"; g.fillText(pad(i + 1), 48, 600);
+    const c = document.createElement("canvas"); c.width = 1024; c.height = 640; const g = c.getContext("2d"), h = (45 + i * 22) % 360;
+    const gr = g.createLinearGradient(0, 0, 1024, 640); gr.addColorStop(0, `oklch(.22 .05 ${h})`); gr.addColorStop(1, `oklch(.62 .13 ${(h + 30) % 360})`);
+    g.fillStyle = gr; g.fillRect(0, 0, 1024, 640); g.fillStyle = "rgba(255,255,255,.14)"; g.font = "700 380px 'Playfair Display', Georgia, serif"; g.fillText(pad(i + 1), 48, 600);
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
   };
   const panels = P.map((p, i) => {
@@ -112,7 +118,7 @@ function init3D() {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(15, 9.4), mat);
     m.position.set((i % 2 ? 1 : -1) * 4.5, ((i % 3) - 1) * 1.2, camZ(i + 1) - 19);
     m.userData = {i, stop: i + 1};
-    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry), new THREE.LineBasicMaterial({color: 0x6BB0F9, transparent: true, opacity: 0})));
+    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry), new THREE.LineBasicMaterial({color: 0xE0B565, transparent: true, opacity: 0})));
     scene.add(m);
     if (p.cover) loader.load(p.cover, t => { t.colorSpace = THREE.SRGBColorSpace; mat.map = t; mat.needsUpdate = true; });
     return m;
@@ -180,6 +186,7 @@ function init3D() {
       m.material.opacity = s; m.children[0].material.opacity = s * .8; m.visible = s > .01;
       if (!reduce) m.rotation.y = Math.sin(now / 1000 * .4 + m.userData.i) * .05;
     }
+    const bs = clamp(1 - cur * 1.3, 0, 1); ball.visible = bs > .01; ball.scale.setScalar(bs || .001); ball.position.y = 1.5 + (reduce ? 0 : Math.sin(now / 1800) * .25);
     overlay(); renderer.render(scene, camera);
   })(last);
 }
