@@ -59,23 +59,23 @@ $("#copen").onclick = () => { const i = Math.round(cur) - 1; if (P[i]) openProje
 
 /* ---------- WebGL scene ---------- */
 let renderer = null;
-try { renderer = new THREE.WebGLRenderer({canvas: $("#gl"), antialias: true, powerPreference: "high-performance"}); }
+try { renderer = new THREE.WebGLRenderer({canvas: $("#gl"), antialias: true, alpha: true, powerPreference: "high-performance"}); }
 catch (e) { document.documentElement.classList.add("nogl"); }
 if (renderer) init3D();
 
 function init3D() {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.setClearColor(0x0E0805, 1);
+  renderer.setClearColor(0x0E0805, 0);
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x0E0805, 0.006);
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 500);
   const END = camZ(N - 1) - 80;
 
   /* drifting light dust */
-  const count = innerWidth < 760 ? 6000 : 15000, pos = new Float32Array(count * 3), seed = new Float32Array(count), size = new Float32Array(count);
+  const count = innerWidth < 760 ? 1200 : 3000, pos = new Float32Array(count * 3), seed = new Float32Array(count), size = new Float32Array(count);
   for (let i = 0; i < count; i++) {
     let x, y; do { x = (Math.random() - .5) * 90; y = (Math.random() - .5) * 60; } while (Math.abs(x) < 3 && Math.abs(y) < 3);
-    pos.set([x, y, 30 + Math.random() * (END - 30)], i * 3); seed[i] = Math.random(); size[i] = .5 + Math.random() * 1.6;
+    pos.set([x, y, 30 + Math.random() * (END - 30)], i * 3); seed[i] = Math.random(); size[i] = .6 + Math.random() * 1.4;
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
@@ -90,15 +90,9 @@ function init3D() {
       gl_PointSize=aSize*uPx*(60./max(d,1.));
       vA=smoothstep(0.,6.,d)*(1.-smoothstep(90.,170.,d))*(.55+.45*sin(uTime*(1.+aSeed*3.)+aSeed*60.));
       vC=mix(vec3(1.,.68,.3),vec3(1.,.94,.82),aSeed*aSeed);}`,
-    fragmentShader: `varying float vA;varying vec3 vC;void main(){float r=length(gl_PointCoord-.5);gl_FragColor=vec4(vC,smoothstep(.5,0.,r)*vA*.9);}`
+    fragmentShader: `varying float vA;varying vec3 vC;void main(){float r=length(gl_PointCoord-.5);gl_FragColor=vec4(vC,smoothstep(.5,0.,r)*vA*.55);}`
   }));
   dust.frustumCulled = false; scene.add(dust);
-
-  /* fibres along the corridor */
-  const lp = [];
-  for (let x = -30; x <= 30; x += 10) for (let y = -20; y <= 20; y += 10) lp.push(x, y, 40, x, y, END);
-  const lg = new THREE.BufferGeometry(); lg.setAttribute("position", new THREE.Float32BufferAttribute(lp, 3));
-  scene.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({color: 0xC9974A, transparent: true, opacity: .14, blending: THREE.AdditiveBlending, depthWrite: false})));
 
   /* disco ball render from leborrel.nl, blended additively so its dark backdrop vanishes */
   const bt = new THREE.TextureLoader().load("images/discoball.webp", t => { t.colorSpace = THREE.SRGBColorSpace; });
